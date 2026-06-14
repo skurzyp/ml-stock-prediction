@@ -1,0 +1,11 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 26.5.1
+    hooks:
+      - id: black
+        language_version: python3.14
+
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.410
+    hooks:
+      - id: pyright

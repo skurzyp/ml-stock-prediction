@@ -15,4 +15,13 @@ dependencies = [
 dev = [
     "black>=26.5.1",
     "kaggle>=2.2.1",
+    "pre-commit>=4.6.0",
+    "pyright>=1.1.410",
 ]
+
+[tool.pyright]
+typeCheckingMode = "basic"
+include = ["src"]
+
+[tool.black]
+line-length = 88
