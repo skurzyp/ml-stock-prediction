@@ -41,10 +41,26 @@ uv run python src/train.py
 uv run python src/evaluate.py
 ```
 
-## Code formatting
+## Code quality
 
+**Format** with black:
 ```bash
 uv run black src/
+```
+
+**Type-check** with pyright (basic mode):
+```bash
+uv run pyright
+```
+
+**Pre-commit hooks** run both automatically on every `git commit`. Install once after cloning:
+```bash
+uv run pre-commit install
+```
+
+To run the hooks manually without committing:
+```bash
+uv run pre-commit run --all-files
 ```
 
 ## Local vs. Kaggle
