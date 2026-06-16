@@ -2,7 +2,31 @@
 
 Predicts the daily directional movement (UP/DOWN) of the NASDAQ Composite index using an LSTM neural network.
 
+## Data record
+
+Each row in `data/nasdaq_features.json` represents one trading day and contains the following fields:
+
+| Field | Description |
+|---|---|
+| `Close` | Adjusted closing price |
+| `rsi_14` | Relative Strength Index (14-day window) |
+| `macd` | MACD line (12/26 EMA difference) |
+| `macd_signal` | Signal line (9-day EMA of MACD) |
+| `macd_diff` | MACD histogram (macd − signal) |
+| `bb_high` | Bollinger Band upper band (20-day, 2σ) |
+| `bb_low` | Bollinger Band lower band (20-day, 2σ) |
+| `bb_mid` | Bollinger Band middle band (20-day SMA) |
+| `bb_pband` | Bollinger Band %B — where Close sits within the band |
+| `sma_20` | Simple Moving Average over 20 days |
+| `sma_50` | Simple Moving Average over 50 days |
+| `atr_14` | Average True Range over 14 days (volatility proxy) |
+| `target` | Binary label: `1` if next day's close > today's, `0` otherwise |
+
+Before training, all features (excluding `target`) are standardized to zero mean and unit variance using a `StandardScaler` fitted on the training split only.
+
 ## Prerequisites
+
+
 
 - **uv** — [installation guide](https://docs.astral.sh/uv/getting-started/installation/)
 - **Kaggle account** — needed for GPU training ([setup guide](https://www.kaggle.com/docs/api))
@@ -39,6 +63,12 @@ uv run python src/train.py
 
 # Step 3: Evaluate on the held-out test set
 uv run python src/evaluate.py
+```
+
+## Tests
+
+```bash
+uv run pytest
 ```
 
 ## Code quality

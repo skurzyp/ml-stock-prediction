@@ -17,3 +17,18 @@ PATIENCE = 10
 
 DATA_PATH = "data/nasdaq_features.json"
 MODEL_PATH = "data/best_model.pt"
+
+FEATURE_COLS = [
+    "Close",
+    "rsi_14",
+    "macd",
+    "macd_signal",
+    "macd_diff",
+    "bb_high",
+    "bb_low",
+    "bb_mid",
+    "bb_pband",
+    "sma_20",
+    "sma_50",
+    "atr_14",
+]

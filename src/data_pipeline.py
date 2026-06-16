@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 
 
 def download_raw_data(ticker: str, start: str, end: str | None) -> pd.DataFrame:
+    """Download OHLCV data from yfinance and flatten any MultiIndex columns."""
     df = yf.download(ticker, start=start, end=end, auto_adjust=True, progress=False)
     if df is None or df.empty:
         raise ValueError(f"No data returned for {ticker}")
@@ -26,6 +27,7 @@ def download_raw_data(ticker: str, start: str, end: str | None) -> pd.DataFrame:
 
 
 def add_technical_indicators(df: pd.DataFrame) -> pd.DataFrame:
+    """Compute RSI, MACD, Bollinger Bands, SMA, and ATR; drops raw OHLV columns keeping only Close."""
     close = cast(pd.Series, df["Close"])
     high = cast(pd.Series, df["High"])
     low = cast(pd.Series, df["Low"])
@@ -54,12 +56,14 @@ def add_technical_indicators(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def create_target(df: pd.DataFrame) -> pd.DataFrame:
+    """Label each row 1 if the next day's close is higher, 0 otherwise; drops the last row (no future label)."""
     df["target"] = (df["Close"].shift(-1) > df["Close"]).astype(int)
     df = cast(pd.DataFrame, df.iloc[:-1])
     return df
 
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
+    """Drop rows with NaN values introduced during indicator warmup periods."""
     before = len(df)
     df = cast(pd.DataFrame, df.dropna())
     log.info(
@@ -71,6 +75,7 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def save_to_json(df: pd.DataFrame, path: str) -> None:
+    """Serialize dataframe to JSON (records orientation), creating parent directories as needed."""
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     df.to_json(path, orient="records", date_format="iso")
     log.info("Saved %d rows to %s", len(df), path)
