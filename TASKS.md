@@ -20,11 +20,11 @@
 
 ## Phase 2 — Dataset & DataLoader (`src/dataset.py`)
 
-- [ ] 2.1 `chronological_split(df, train_ratio, val_ratio) -> (train, val, test)` — no shuffling
-- [ ] 2.2 `fit_scaler(train_df, feature_cols) -> scaler` — `StandardScaler` fit on train only
-- [ ] 2.3 `transform_split(df, scaler, feature_cols) -> np.ndarray`
-- [ ] 2.4 `NASDAQSequenceDataset(Dataset)` — `__getitem__` returns `(X: (60, F), y: scalar)`
-- [ ] 2.5 `build_dataloaders(train_ds, val_ds, test_ds, batch_size)` — train shuffles, val/test don't
+- [x] 2.1 `chronological_split(df, train_ratio, val_ratio) -> (train, val, test)` — no shuffling
+- [x] 2.2 `fit_scaler(train_df, feature_cols) -> scaler` — `StandardScaler` fit on train only
+- [x] 2.3 `transform_split(df, scaler, feature_cols) -> np.ndarray`
+- [x] 2.4 `NASDAQSequenceDataset(Dataset)` — `__getitem__` returns `(X: (60, F), y: scalar)`
+- [x] 2.5 `build_dataloaders(train_ds, val_ds, test_ds, batch_size)` — train shuffles, val/test don't
 
 ## Phase 3 — Model (`src/model.py`)
 
@@ -50,4 +50,4 @@
 
 - [ ] 6.1 `uv run black src/` — format all source files
 - [x] 6.2 `.gitignore` — add `data/`, `.venv/`, `__pycache__/`
-- [ ] 6.3 Update `README.md` with spec + quick-start commands
+- [x] 6.3 Update `README.md` with data record schema, pytest instructions, and quick-start commands
