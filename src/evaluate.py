@@ -31,8 +31,9 @@ def collect_predictions(
 
     for x_batch, y_batch in loader:
         logits = model(x_batch.to(device))
+        y_batch = y_batch.view_as(logits)
         probs = torch.sigmoid(logits).cpu().numpy()
-        all_labels.append(y_batch.numpy())
+        all_labels.append(y_batch.cpu().numpy())
         all_probs.append(probs)
 
     labels = np.concatenate(all_labels)
