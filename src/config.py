@@ -1,3 +1,5 @@
+SEED = 42
+
 TICKER = "^IXIC"
 START_DATE = "2016-01-01"
 END_DATE = None
