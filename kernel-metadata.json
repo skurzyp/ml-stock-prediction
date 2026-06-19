@@ -1,0 +1,13 @@
+{
+  "id": "stanisawkurzyp/lstm-stock-prediction",
+  "title": "LSTM Stock Prediction",
+  "code_file": "kaggle_runner.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_internet": "true",
+  "dataset_sources": ["stanisawkurzyp/lstm-stock-prediction-src"],
+  "kernel_sources": [],
+  "competition_sources": []
+}

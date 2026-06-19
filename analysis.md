@@ -21,31 +21,29 @@ All models used `DROPOUT=0.2`, `BATCH_SIZE=32`, and `NUM_LAYERS=2`.
 
 | Experiment | Target Horizon | Seq Len | Model | Accuracy | ROC-AUC | McNemar vs Other Model |
 | :--- | :---: | :---: | :--- | :---: | :---: | :--- |
-| **Baseline** | 1 | 60 | LSTM <br> CNN | 0.53 <br> 0.50 | 0.5073 <br> 0.4526 | No sig. diff (p=0.409) |
-| **Changed Training** | 1 | 60 | LSTM <br> CNN | 0.54 <br> 0.44 | **0.5260** <br> 0.4536 | LSTM significantly better (p=0.046) |
-| **Changed Data** | 1 | 120 | LSTM <br> CNN | 0.57 <br> **0.60** | 0.4792 <br> 0.4615 | No sig. diff (p=0.163) |
-| **Future Baseline** | 5 | 60 | LSTM <br> CNN | 0.42 <br> 0.40 | 0.4132 <br> 0.3842 | No sig. diff (p=0.669) |
-| **Future Changed Training** | 5 | 60 | LSTM <br> CNN | 0.43 <br> 0.40 | 0.4152 <br> 0.3686 | No sig. diff (p=0.533) |
-| **Future Changed Data** | 5 | 120 | LSTM <br> CNN | 0.40 <br> 0.46 | 0.4704 <br> **0.5106** | CNN significantly better (p=0.008) |
+| **baseline** | 1 | 60 | LSTM <br> CNN | 0.57 <br> 0.51 | 0.4960 <br> 0.4544 | No sig. diff (p=0.096) |
+| **changed_training** | 1 | 60 | LSTM <br> CNN | 0.57 <br> 0.49 | 0.5326 <br> 0.4526 | LSTM sig. better (p=0.032) |
+| **changed_data** | 1 | 120 | LSTM <br> CNN | **0.60** <br> **0.60** | **0.5475** <br> 0.4436 | No sig. diff (p=1.000) |
+| **future_baseline** | 5 | 60 | LSTM <br> CNN | 0.55 <br> 0.39 | 0.4143 <br> 0.3942 | LSTM sig. better (p=0.000) |
+| **future_changed_training** | 5 | 60 | LSTM <br> CNN | 0.48 <br> 0.37 | 0.4929 <br> 0.3825 | LSTM sig. better (p=0.000) |
+| **future_changed_data** | 5 | 120 | LSTM <br> CNN | 0.42 <br> 0.37 | 0.4225 <br> 0.4256 | LSTM sig. better (p=0.003) |
 
 ---
 
 ## Key Takeaways and Analysis
 
 ### 1. The Challenge of Predicting Further Out
-Predicting the price movement 5 days in the future is significantly harder than predicting the very next day. 
-Across the board, both Accuracy and ROC-AUC metrics plummeted when shifting from a 1-day horizon to a 5-day horizon. For the 60-day sequence lengths (`future_baseline`, `future_changed_training`), models essentially failed to learn any meaningful signal, with ROC-AUCs hovering around 0.36 - 0.41 (worse than random chance on the test set, indicating severe overfitting to noise during training).
+Predicting stock price movements 5 days in the future is significantly more challenging than predicting the very next day. 
+Across the board, Accuracy and ROC-AUC metrics plummeted when shifting from a 1-day horizon to a 5-day horizon. For all 5-day horizon configurations, both models struggled to learn any reliable signal, with ROC-AUCs staying below 0.50 (worse than random chance on the test set). This indicates that predicting multi-day directions with standard sequential architectures on raw technical indicators is highly prone to overfitting on noise.
 
-### 2. Sequence Length Matters for Multi-Day Horizons
-The only 5-day horizon model that managed to breach the 0.5 ROC-AUC threshold was the **CNN in the `Future Changed Data` setup (`SEQ_LEN=120`)**. 
-It seems that to predict trends a week out, the models require a much wider field of view (120 days vs 60 days). The CNN was statistically significantly better ($p < 0.05$) than the LSTM in this scenario, suggesting the convolutions were better at picking up broader cyclical patterns in the 120-day window than the recurrent LSTM cells.
+### 2. LSTM Outperforms CNN
+Across almost all experimental variants, the **LSTM model consistently outperformed the CNN model** in terms of both Accuracy and ROC-AUC. 
+- In `changed_training` (1-day horizon), the LSTM achieved an ROC-AUC of **0.5326**, which was statistically significantly better than the CNN's 0.4526 (p=0.032).
+- In the 5-day prediction experiments, the LSTM's accuracy was consistently higher than the CNN's (e.g. 0.55 vs 0.39 in the baseline), and McNemar tests indicated a statistically significant difference in errors (p < 0.005), showing that LSTM's memory cells are much better suited for stock sequence modeling than the CNN's temporal convolutions on this dataset.
 
-### 3. Model Capacity vs Overfitting
-In the 1-day horizon, increasing the model capacity and lowering the learning rate (`Changed Training`: Hidden=256, LR=0.0005) resulted in the **best overall ROC-AUC of 0.5260** for the LSTM. The LSTM significantly outperformed the CNN in this configuration.
-However, this larger capacity backfired on the 5-day horizon (`Future Changed Training`), failing to improve over the baseline and heavily overfitting the training set.
-
-### 4. High Accuracy vs Low ROC-AUC
-In the `Changed Data` (1-day) experiment, the CNN achieved the highest absolute accuracy of the entire sweep (**0.60**). However, its ROC-AUC was a poor **0.4615**. This discrepancy typically happens when a model degenerates into predicting the majority class (e.g., predicting "UP" almost every time during a bull market phase in the test set). The poor ROC-AUC confirms that the model is poorly calibrated and isn't actually separating the classes well, despite the high accuracy number.
+### 3. Benefit of Longer Sequence Lengths
+Increasing the sequence length from 60 to 120 days (`changed_data`) gave the LSTM its **best overall performance of the entire sweep: 0.60 Accuracy and 0.5475 ROC-AUC**. 
+However, for the CNN, the longer historical lookback did not help, and its performance remained weak (ROC-AUC 0.4436), suggesting it struggled to leverage the extra context.
 
 ## Conclusion
-Predicting stock price direction remains an incredibly noisy task. If predicting 1 day out, a standard **LSTM with higher capacity (Hidden=256) and a 60-day lookback** performed best. If predicting a 5-day trend, switching to a **120-day lookback** is strictly necessary, and the **CNN architecture** proved vastly superior to the LSTM at extracting those longer-term features.
+Predicting stock price direction remains an incredibly noisy task. If predicting 1 day out, a standard **LSTM with a 120-day lookback** performed best, achieving a solid **0.60 Accuracy and 0.5475 ROC-AUC**. For predicting longer 5-day horizons, the task becomes highly speculative under these configurations, though the **LSTM model still demonstrated superior robustness** compared to the CNN.
