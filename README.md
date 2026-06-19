@@ -55,14 +55,14 @@ chmod 600 ~/.kaggle/kaggle.json
 All commands are run via `uv run` — no need to activate a virtualenv manually.
 
 ```bash
-# Step 1: Download data and engineer features → data/nasdaq_features.json
-uv run python src/data_pipeline.py
+# Run the complete pipeline (data -> train -> evaluate)
+# Outputs (models, charts, metrics) will be saved to a timestamped directory: data/runs/<run_id>/
+uv run python scripts/run_pipeline.py
 
-# Step 2: Train the model → data/best_model.pt
-uv run python src/train.py
-
-# Step 3: Evaluate on the held-out test set
-uv run python src/evaluate.py
+# Alternatively, run stages individually (ensure RUN_ID is set in your environment if you want them grouped)
+# uv run python -m src.data_pipeline
+# uv run python -m src.train
+# uv run python -m src.evaluate
 ```
 
 ## Tests
@@ -97,10 +97,21 @@ uv run pre-commit run --all-files
 
 The code automatically uses GPU if available (`cuda`) and falls back to CPU otherwise.
 
-- **Local (CPU):** good for development and quick smoke-tests
-- **Kaggle (GPU):** use for full training runs (~30h/week free)
+- **Local (CPU):** Good for development and quick smoke-tests.
+- **Kaggle (GPU):** Use for full training runs (~30 hours/week free GPU).
 
-```bash
-# Push code to Kaggle for GPU training
-uv run kaggle kernels push
-```
+To run on Kaggle:
+
+`src/` ships as a private Kaggle Dataset (`<username>/lstm-stock-prediction-src`) that the kernel mounts at `/kaggle/input/`. The entry point [kaggle_runner.py](file:///Users/stanislawkurzyp/Documents/private/topol/lstm-stock-prediction/kaggle_runner.py) puts that path on `sys.path` and runs each stage as `python -m src.<stage>`, so the code that runs on Kaggle is byte-identical to what you run locally.
+
+1. **Set up Kaggle API Token:** Make sure `~/.kaggle/kaggle.json` is in place (see instructions above).
+2. **Configure Username (one-time):** In [kernel-metadata.json](file:///Users/stanislawkurzyp/Documents/private/topol/lstm-stock-prediction/kernel-metadata.json), replace both occurrences of `YOUR_KAGGLE_USERNAME` (in `id` and `dataset_sources`) with your Kaggle username.
+3. **Deploy:** Stage the dataset, version-or-create it, and push the kernel in one command:
+   ```bash
+   uv run python scripts/deploy_kaggle.py -m "what changed"
+   ```
+4. **View Status/Logs:**
+   ```bash
+   uv run kaggle kernels status
+   uv run kaggle kernels output
+   ```

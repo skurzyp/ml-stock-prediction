@@ -56,9 +56,9 @@ def add_technical_indicators(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def create_target(df: pd.DataFrame) -> pd.DataFrame:
-    """Label each row 1 if the next day's close is higher, 0 otherwise; drops the last row (no future label)."""
-    df["target"] = (df["Close"].shift(-1) > df["Close"]).astype(int)
-    df = cast(pd.DataFrame, df.iloc[:-1])
+    """Label each row 1 if the close TARGET_HORIZON days from now is higher, 0 otherwise."""
+    df["target"] = (df["Close"].shift(-config.TARGET_HORIZON) > df["Close"]).astype(int)
+    df = cast(pd.DataFrame, df.iloc[: -config.TARGET_HORIZON])
     return df
 
 
